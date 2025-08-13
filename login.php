@@ -1,53 +1,45 @@
-
 <?php
-include('../includes/db.php');  // Include the database connection
+include '../includes/db.php';
 session_start();
 
 if (isset($_POST['login'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // Prepare the SQL query
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? AND role = 'admin'");
     $stmt->execute([$email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user && password_verify($password, $user['password'])) {
-        // Successful login
-        $_SESSION['user_id'] = $user['id']; // Store user ID in session
-        header("Location: ../index.php"); // Redirect to the main page
+        $_SESSION['admin_id'] = $user['id'];
+        header("Location: dashboard.php");
         exit();
     } else {
-        // Invalid login
-        $error_message = "Invalid email or password.";
+        echo "<p style='color:red; text-align:center;'>Invalid credentials or not an admin.</p>";
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Admin Login</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fa;
             margin: 0;
             padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
         }
         .login-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 100px auto;
             background-color: #fff;
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         h2 {
             text-align: center;
@@ -55,27 +47,27 @@ if (isset($_POST['login'])) {
             margin-bottom: 20px;
         }
         label {
-            font-size: 1.1em;
-            margin-bottom: 5px;
             display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
         }
-        input[type="email"],
-        input[type="password"] {
+        input[type="email"], input[type="password"] {
             width: 100%;
             padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 1em;
+            margin: 10px 0 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
         }
         button {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background-color: #28a745;
-            color: white;
-            font-size: 1.1em;
             border: none;
-            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s;
         }
@@ -83,26 +75,30 @@ if (isset($_POST['login'])) {
             background-color: #218838;
         }
         .error-message {
-            color: #e74c3c;
-            font-size: 1em;
             text-align: center;
-            margin-top: 10px;
+            color: red;
+            font-size: 14px;
+        }
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
+
     <div class="login-container">
-        <h2>Login</h2>
+        <h2>Admin Login</h2>
         <form method="POST">
-            <label>Email:</label>
-            <input type="email" name="email" required>
-            <label>Password:</label>
-            <input type="password" name="password" required>
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email" required>
+
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" required>
+
             <button type="submit" name="login">Login</button>
         </form>
-        <?php if (isset($error_message)): ?>
-            <p class="error-message"><?= htmlspecialchars($error_message); ?></p>
-        <?php endif; ?>
     </div>
+
 </body>
 </html>
